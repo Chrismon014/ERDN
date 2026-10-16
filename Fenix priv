@@ -841,37 +841,9 @@ tabs.strength.calculatePace = function()
 end
 
 tabs.strength.updateAdaptiveRate = function()
-    tabs.strength.controlNow = tick()
-    tabs.strength.controlElapsed = tabs.strength.controlNow - tabs.strength.lastControlAt
-    if tabs.strength.controlElapsed < tabs.strength.controlInterval then
-        return
-    end
-
-    tabs.strength.serverProgress = tabs.strength.strength.Value > tabs.strength.lastControlStrength
-        or tabs.strength.durability.Value > tabs.strength.lastControlDurability
-
-    if tabs.strength.serverProgress then
-        tabs.strength.stalledIntervals = 0
-        tabs.strength.lastProgressAt = tabs.strength.controlNow
-        tabs.strength.sendRate = math.min(tabs.strength.maxSendRate, tabs.strength.sendRate * 1.12)
-        tabs.strength.Status.Text = "Status: Farming | "
-            .. formatNumber(tabs.strength.sendRate) .. " reps/s"
-        tabs.strength.Status.TextColor3 = Color3.fromRGB(80, 255, 120)
-    else
-        tabs.strength.stalledIntervals = tabs.strength.stalledIntervals + 1
-    end
-
-    if tabs.strength.stalledIntervals >= 2 then
-        tabs.strength.sendRate = math.max(tabs.strength.initialSendRate, tabs.strength.sendRate * 0.65)
-        tabs.strength.sendTokens = 0
-        tabs.strength.Status.Text = "Status: Slowing for server | "
-            .. formatNumber(tabs.strength.sendRate) .. " reps/s"
-        tabs.strength.Status.TextColor3 = Color3.fromRGB(255, 180, 70)
-    end
-
-    tabs.strength.lastControlAt = tabs.strength.controlNow
-    tabs.strength.lastControlStrength = tabs.strength.strength.Value
-    tabs.strength.lastControlDurability = tabs.strength.durability.Value
+    tabs.strength.sendRate = 20000
+    tabs.strength.Status.Text = "Status: Farming | 20,000 reps/s (MAX)"
+    tabs.strength.Status.TextColor3 = Color3.fromRGB(80, 255, 120)
 end
 
 tabs.strength.workerLoop = function()
@@ -886,10 +858,7 @@ tabs.strength.workerLoop = function()
             tabs.strength.maxBurst,
             tabs.strength.sendTokens + tabs.strength.sendRate * tabs.strength.loopElapsed
         )
-        tabs.strength.burstLimit = math.max(
-            1,
-            math.min(tabs.strength.maxBurst, math.ceil(tabs.strength.sendRate * 0.05))
-        )
+        tabs.strength.burstLimit = tabs.strength.maxBurst
         tabs.strength.sendCount = math.min(
             math.floor(tabs.strength.sendTokens),
             tabs.strength.burstLimit
@@ -932,7 +901,7 @@ end)
 tabs.strength:AddTextBox("Max reps/s: " .. tabs.strength.maxSendRate, function(inputText)
     tabs.strength.maxSendRate = tonumber(inputText)
 
-    if tabs.strengthmaxSendRate then
+    if tabs.strength.maxSendRate then
         tabs.strength.maxSendRate = math.max(1, tabs.strength.maxSendRate)
         tabs.strength.sendRate = math.min(
             tabs.strength.sendRate,
@@ -957,7 +926,7 @@ tabs.strength.FastRepToggle = tabs.strength:AddSwitch("Fast Rep", function(state
         tabs.strength.lastStrength = tabs.strength.strength.Value
         tabs.strength.lastDurability = tabs.strength.durability.Value
         tabs.strength.paceBaselineReady = false
-        tabs.strength.sendRate = tabs.strength.initialSendRate
+        tabs.strength.sendRate = 20000
         tabs.strength.sendTokens = 0
         tabs.strength.lastLoopAt = os.clock()
         tabs.strength.lastControlAt = tick()
@@ -965,7 +934,7 @@ tabs.strength.FastRepToggle = tabs.strength:AddSwitch("Fast Rep", function(state
         tabs.strength.lastControlStrength = tabs.strength.strength.Value
         tabs.strength.lastControlDurability = tabs.strength.durability.Value
         tabs.strength.stalledIntervals = 0
-        tabs.strength.Status.Text = "Status: Farming | 200 reps/s"
+        tabs.strength.Status.Text = "Status: Farming | 20,000 reps/s"
         tabs.strength.Status.TextColor3 = Color3.fromRGB(80, 255, 120)
         tabs.strength.startWorker()
     else
