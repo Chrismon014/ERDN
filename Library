@@ -1,0 +1,314 @@
+-- ==========================================
+-- LIBRERÍA DE INTERFAZ Y RUNTIME PARA SILENCE
+-- ==========================================
+
+local Library = {}
+Library.__index = Library
+
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+-- Runtime auxiliar para manejar hilos y conexiones
+Library.Runtime = {}
+
+function Library.Runtime:Spawn(func, ...)
+    return task.spawn(func, ...)
+end
+
+function Library.Runtime:Connect(signal, func)
+    return signal:Connect(func)
+end
+
+function Library.Runtime:Defer(func, ...)
+    return task.defer(func, ...)
+end
+
+function Library:EnableAntiAFK()
+    local vu = game:GetService("VirtualUser")
+    Player.Idled:Connect(function()
+        vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+        task.wait(1)
+        vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    end)
+end
+
+-- Crear la ventana principal y la UI
+function Library:AddWindow(titleText, config)
+    config = config or {}
+    local mainColor = config.main_color or Color3.fromRGB(138, 0, 0)
+    
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "SilenceLibraryGui"
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ScreenGui.Parent = (gethui and gethui()) or PlayerGui
+
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Name = "MainFrame"
+    MainFrame.Size = UDim2.new(0, 520, 0, 580)
+    MainFrame.Position = UDim2.new(0.5, -260, 0.5, -290)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Parent = ScreenGui
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 8)
+    UICorner.Parent = MainFrame
+
+    local TopBar = Instance.new("Frame")
+    TopBar.Name = "TopBar"
+    TopBar.Size = UDim2.new(1, 0, 0, 35)
+    TopBar.BackgroundColor3 = mainColor
+    TopBar.BorderSizePixel = 0
+    TopBar.Parent = MainFrame
+
+    local TopCorner = Instance.new("UICorner")
+    TopCorner.CornerRadius = UDim.new(0, 8)
+    TopCorner.Parent = TopBar
+
+    -- Solución para corregir las esquinas inferiores del TopBar
+    local FixBar = Instance.new("Frame")
+    FixBar.Size = UDim2.new(1, 0, 0, 5)
+    FixBar.Position = UDim2.new(0, 0, 1, -5)
+    FixBar.BackgroundColor3 = mainColor
+    FixBar.BorderSizePixel = 0
+    FixBar.Parent = TopBar
+
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Size = UDim2.new(1, -20, 1, 0)
+    TitleLabel.Position = UDim2.new(0, 10, 0, 0)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Font = Enum.Font.GothamBold
+    TitleLabel.Text = titleText
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.TextSize = 14
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLabel.Parent = TopBar
+
+    local WindowObj = {}
+    WindowObj.TitleLabel = TitleLabel
+
+    function WindowObj:SetTitle(newTitle)
+        self.TitleLabel.Text = newTitle
+    end
+
+    -- Contenedor de Pestañas (Tabs)
+    local TabButtonsContainer = Instance.new("ScrollingFrame")
+    TabButtonsContainer.Size = UDim2.new(1, 0, 0, 35)
+    TabButtonsContainer.Position = UDim2.new(0, 0, 0, 35)
+    TabButtonsContainer.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+    TabButtonsContainer.BorderSizePixel = 0
+    TabButtonsContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+    TabButtonsContainer.ScrollBarThickness = 0
+    TabButtonsContainer.Parent = MainFrame
+
+    local UIListLayoutTabs = Instance.new("UIListLayout")
+    UIListLayoutTabs.FillDirection = Enum.FillDirection.Horizontal
+    UIListLayoutTabs.SortOrder = Enum.SortOrder.LayoutOrder
+    UIListLayoutTabs.Parent = TabButtonsContainer
+
+    local PagesContainer = Instance.new("Frame")
+    PagesContainer.Size = UDim2.new(1, 0, 1, -70)
+    PagesContainer.Position = UDim2.new(0, 0, 0, 70)
+    PagesContainer.BackgroundTransparency = 1
+    PagesContainer.Parent = MainFrame
+
+    local firstTab = true
+
+    function WindowObj:AddTab(tabName)
+        local TabPage = Instance.new("ScrollingFrame")
+        TabPage.Name = tabName .. "Page"
+        TabPage.Size = UDim2.new(1, 0, 1, 0)
+        TabPage.BackgroundTransparency = 1
+        TabPage.Visible = false
+        TabPage.CanvasSize = UDim2.new(0, 0, 0, 0)
+        TabPage.ScrollBarThickness = 4
+        TabPage.Parent = PagesContainer
+
+        local UIListLayoutPage = Instance.new("UIListLayout")
+        UIListLayoutPage.SortOrder = Enum.SortOrder.LayoutOrder
+        UIListLayoutPage.Padding = UDim.new(0, 6)
+        UIListLayoutPage.Parent = TabPage
+
+        UIListLayoutPage:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            TabPage.CanvasSize = UDim2.new(0, 0, 0, UIListLayoutPage.AbsoluteContentSize.Y + 10)
+        end)
+
+        local TabButton = Instance.new("TextButton")
+        TabButton.Size = UDim2.new(0, 90, 1, 0)
+        TabButton.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+        TabButton.BorderSizePixel = 0
+        TabButton.Font = Enum.Font.GothamSemibold
+        TabButton.Text = tabName
+        TabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+        TabButton.TextSize = 13
+        TabButton.Parent = TabButtonsContainer
+
+        local TabObj = {}
+
+        function TabObj:Show()
+            for _, child in ipairs(PagesContainer:GetChildren()) do
+                if child:IsA("ScrollingFrame") then
+                    child.Visible = false
+                end
+            end
+            for _, child in ipairs(TabButtonsContainer:GetChildren()) do
+                if child:IsA("TextButton") then
+                    child.TextColor3 = Color3.fromRGB(180, 180, 180)
+                    child.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+                end
+            end
+            TabPage.Visible = true
+            TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            TabButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        end
+
+        TabButton.MouseButton1Click:Connect(function()
+            TabObj:Show()
+        end)
+
+        if firstTab then
+            TabObj:Show()
+            firstTab = false
+        end
+
+        function TabObj:AddLabel(text)
+            local Label = Instance.new("TextLabel")
+            Label.Size = UDim2.new(1, -20, 0, 25)
+            Label.BackgroundTransparency = 1
+            Label.Font = Enum.Font.GothamMedium
+            Label.Text = text
+            Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+            Label.TextSize = 13
+            Label.TextXAlignment = Enum.TextXAlignment.Left
+            Label.Parent = TabPage
+            return Label
+        end
+
+        function TabObj:AddSwitch(text, callback)
+            local SwitchFrame = Instance.new("Frame")
+            SwitchFrame.Size = UDim2.new(1, -20, 0, 35)
+            SwitchFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            SwitchFrame.BorderSizePixel = 0
+            SwitchFrame.Parent = TabPage
+
+            local Corner = Instance.new("UICorner")
+            Corner.CornerRadius = UDim.new(0, 6)
+            Corner.Parent = SwitchFrame
+
+            local Label = Instance.new("TextLabel")
+            Label.Size = UDim2.new(1, -60, 1, 0)
+            Label.Position = UDim2.new(0, 10, 0, 0)
+            Label.BackgroundTransparency = 1
+            Label.Font = Enum.Font.Gotham
+            Label.Text = text
+            Label.TextColor3 = Color3.fromRGB(240, 240, 240)
+            Label.TextSize = 13
+            Label.TextXAlignment = Enum.TextXAlignment.Left
+            Label.Parent = SwitchFrame
+
+            local ToggleButton = Instance.new("TextButton")
+            ToggleButton.Size = UDim2.new(0, 40, 0, 20)
+            ToggleButton.Position = UDim2.new(1, -50, 0.5, -10)
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            ToggleButton.Text = ""
+            ToggleButton.Parent = SwitchFrame
+
+            local TCorner = Instance.new("UICorner")
+            TCorner.CornerRadius = UDim.new(1, 0)
+            TCorner.Parent = ToggleButton
+
+            local Circle = Instance.new("Frame")
+            Circle.Size = UDim2.new(0, 16, 0, 16)
+            Circle.Position = UDim2.new(0, 2, 0.5, -8)
+            Circle.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+            Circle.Parent = ToggleButton
+
+            local CCircle = Instance.new("UICorner")
+            CCircle.CornerRadius = UDim.new(1, 0)
+            CCircle.Parent = Circle
+
+            local enabled = false
+            local SwitchObj = {}
+
+            function SwitchObj:Set(state)
+                enabled = state
+                TweenService:Create(ToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = enabled and mainColor or Color3.fromRGB(50, 50, 50)}):Play()
+                TweenService:Create(Circle, TweenInfo.new(0.2), {Position = enabled and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)}):Play()
+                task.spawn(function()
+                    callback(enabled)
+                end)
+            end
+
+            ToggleButton.MouseButton1Click:Connect(function()
+                SwitchObj:Set(not enabled)
+            end)
+
+            return SwitchObj
+        end
+
+        function TabObj:AddTextBox(placeholder, callback)
+            local BoxFrame = Instance.new("Frame")
+            BoxFrame.Size = UDim2.new(1, -20, 0, 35)
+            BoxFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            BoxFrame.BorderSizePixel = 0
+            BoxFrame.Parent = TabPage
+
+            local Corner = Instance.new("UICorner")
+            Corner.CornerRadius = UDim.new(0, 6)
+            Corner.Parent = BoxFrame
+
+            local TextBox = Instance.new("TextBox")
+            TextBox.Size = UDim2.new(1, -20, 1, 0)
+            TextBox.Position = UDim2.new(0, 10, 0, 0)
+            TextBox.BackgroundTransparency = 1
+            TextBox.Font = Enum.Font.Gotham
+            TextBox.PlaceholderText = placeholder
+            TextBox.Text = ""
+            TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+            TextBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+            TextBox.TextSize = 13
+            TextBox.TextXAlignment = Enum.TextXAlignment.Left
+            TextBox.Parent = BoxFrame
+
+            TextBox.FocusLost:Connect(function(enterPressed)
+                if enterPressed then
+                    callback(TextBox.Text, tonumber(TextBox.Text))
+                end
+            end)
+
+            return TextBox
+        end
+
+        function TabObj:AddButton(text, callback)
+            local Button = Instance.new("TextButton")
+            Button.Size = UDim2.new(1, -20, 0, 35)
+            Button.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            Button.BorderSizePixel = 0
+            Button.Font = Enum.Font.GothamSemibold
+            Button.Text = text
+            Button.TextColor3 = Color3.fromRGB(240, 240, 240)
+            Button.TextSize = 13
+            Button.Parent = TabPage
+
+            local Corner = Instance.new("UICorner")
+            Corner.CornerRadius = UDim.new(0, 6)
+            Corner.Parent = Button
+
+            Button.MouseButton1Click:Connect(function()
+                task.spawn(callback)
+            end)
+
+            return Button
+        end
+
+        return TabObj
+    end
+
+    return WindowObj
+end
+
+return Library
