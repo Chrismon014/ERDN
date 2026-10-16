@@ -238,7 +238,7 @@ task.spawn(function()
     while titleGeneration == _G.SilenceFarmingTitleGeneration do
         task.wait(60)
         if titleGeneration == _G.SilenceFarmingTitleGeneration then
-            silence:SetTitle("Silence | Fast Farming - " .. greeting())
+            silence:SetTitle("ERDN | Fast Farming - " .. greeting())
         end
     end
 end)
@@ -317,13 +317,6 @@ local PETS = {
         rebirth = 0,
     },
 
-    ["Swift Samurai"] = {
-        repSpeed = 15,
-        strength = 0,
-        durability = 0,
-        rebirth = 0,
-    },
-
     ["Titanium Hydra"] = {
         repSpeed = 0,
         strength = 0,
@@ -337,48 +330,56 @@ local PETS = {
         durability = 0,
         rebirth = 2,
     },
+
 	["Inferno Unicorn"] = {
 		repSpeed = 0,
 		strength = 25,
 		durability = 25,
 		rebirth = 0,
 	},
+
 	["Common Boss Pet"] = {
 		repSpeed = 5,
 		strength = 0,
 		durability = 0,
 		rebirth = 0,
 	},
+
 	["Rare Boss Pet"] = {
 		repSpeed = 7,
 		strength = 0,
 		durability = 0,
 		rebirth = 0,
 	},
+
 	["Epic Boss Pet"] = {
 		repSpeed = 10,
 		strength = 0,
 		durability = 0,
 		rebirth = 0,
 	},
+
 	["Rainbow Boss Pet"] = {
 		repSpeed = 10,
 		strength = 7,
 		durability = 0,
 		rebirth = 0,
 	},
+
 	["Legendary Boss Pet"] = {
 		repSpeed = 10,
 		strength = 10,
 		durability = 0,
 		rebirth = 0,
 	},
+
 	["Mythic Boss Pet"] = {
 		repSpeed = 10,
 		strength = 20,
 		durability = 0,
 		rebirth = 0,
 	},
+
     ["Inferno Drake"] = {
         repSpeed = 40,
         strength = 0,
@@ -549,7 +550,7 @@ tabs.rebirths.Runtime = tabs.rebirths:AddLabel("Runtime: 0d 0h 0m 0s")
 tabs.rebirths.RebirthStats = tabs.rebirths:AddLabel("Rebirths: " .. formatCurrentStat(tabs.rebirths.rebirths.Value) .. " | Gained: 0")
 tabs.rebirths.Pace = tabs.rebirths:AddLabel("Pace: -- / Hour | -- / Day | -- / Week")
 tabs.rebirths.AveragePace = tabs.rebirths:AddLabel("Average: -- / Hour | -- / Day | -- / Week")
-tabs.rebirths.Status.TextColor3 = Color3.fromRGB(255, 80, 80)
+tabs.rebirths.Status.TextColor3 = Color3.fromRGB(0, 0, 0)
 
 tabs.rebirths.updateStats = function()
     tabs.rebirths.RebirthStats.Text = "Rebirths: " .. formatCurrentStat(tabs.rebirths.rebirths.Value)
@@ -736,11 +737,11 @@ tabs.strength.calculationInterval = 10
 tabs.strength.lastCalculationAt = tick()
 tabs.strength.lastCalculatedStrength = tabs.strength.strength.Value
 tabs.strength.lastCalculatedDurability = tabs.strength.durability.Value
-tabs.strength.initialSendRate = 200
-tabs.strength.maxSendRate = 659
+tabs.strength.initialSendRate = 20000
+tabs.strength.maxSendRate = 20000
 tabs.strength.sendRate = tabs.strength.initialSendRate
 tabs.strength.sendTokens = 0
-tabs.strength.maxBurst = 24
+tabs.strength.maxBurst = 20000
 tabs.strength.controlInterval = 0.5
 tabs.strength.lastControlAt = tick()
 tabs.strength.lastProgressAt = tick()
