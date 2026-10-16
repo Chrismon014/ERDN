@@ -1,4 +1,4 @@
-Dame todo el script con la integracion q me dijiste: 
+
 --[[
     Silence - Ml Farming
     by Henrik @xyzhenrik
@@ -738,11 +738,11 @@ tabs.strength.calculationInterval = 10
 tabs.strength.lastCalculationAt = tick()
 tabs.strength.lastCalculatedStrength = tabs.strength.strength.Value
 tabs.strength.lastCalculatedDurability = tabs.strength.durability.Value
-tabs.strength.initialSendRate = 50000
-tabs.strength.maxSendRate = 50000
-tabs.strength.sendRate = 50000
+tabs.strength.initialSendRate = 30000
+tabs.strength.maxSendRate = 30000
+tabs.strength.sendRate = 30000
 tabs.strength.sendTokens = 0
-tabs.strength.maxBurst = 50000
+tabs.strength.maxBurst = 30000
 tabs.strength.controlInterval = 0.5
 tabs.strength.lastControlAt = tick()
 tabs.strength.lastProgressAt = tick()
