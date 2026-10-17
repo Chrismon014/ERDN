@@ -10,6 +10,15 @@ local window = library:AddWindow("ERDN PRivate", {
     can_resize = false,
 })
 
+-- FORZAR QUE APAREZCA EN PANTALLA
+task.spawn(function()
+    task.wait(0.5)
+    local gui = game:GetService("CoreGui"):FindFirstChild("imgui")
+    if gui then
+        gui.Enabled = true
+    end
+end)
+
 local AutoFarm = window:AddTab("Farm OP")
 AutoFarm:Show()
 
