@@ -4,28 +4,15 @@ local LocalPlayer = Players.LocalPlayer
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/memejames/elerium-v2-ui-library/main/Library", true))()
 
 -- VENTANA PRINCIPAL
-local window = library:AddWindow("ERDN PRivate", {
-    main_color = Color3.fromRGB(0, 0, 0), -- dark 
+local window = library:AddWindow("ERDN PRIVATE", {
+    main_color = Color3.fromRGB(0, 0, 0), -- dark purple
     min_size = Vector2.new(610, 830),
     can_resize = false,
 })
 
--- Bucle para animar el RGB de manera fluida en los márgenes y elementos
-task.spawn(function()
-    local hue = 0
-    while true do
-        hue = (hue + 0.002) % 1 -- Velocidad del cambio de color (ajústala si lo quieres más rápido o lento)
-        local rgbColor = Color3.fromHSV(hue, 1, 1)
-        
-        pcall(function()
-            -- Aplica el color actualizado al tema principal de la librería de Elerium
-            window.main_color = rgbColor
-            -- Si la librería soporta actualización visual directa en los bordes/marcos, se reflejará aquí
-        end)
-        
-        task.wait(0.03)
-    end
-end)
+local AutoFarm = window:AddTab("Farm OP")
+AutoFarm:Show()
+
 
 -- 1ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â£ Switch: Fuerza OP
 AutoFarm:AddSwitch("OP STRENGTH", function(state)
@@ -43,10 +30,10 @@ local PET_NAME = "Swift Samurai"
 local ROCK_NAME = "Rock5M"
 local PROTEIN_EGG_NAME = "ProteinEgg"
 local PROTEIN_EGG_INTERVAL = 30 * 60 -- 30 min
-local REPS_PER_CYCLE = 180
-local REP_DELAY = 0.01
+local REPS_PER_CYCLE = 20000
+local REP_DELAY = 0.001
 local ROCK_INTERVAL = 1
-local MAX_PING = 1100
+local MAX_PING = 110000
 
 local HumanoidRootPart
 local lastProteinEggTime = 0
