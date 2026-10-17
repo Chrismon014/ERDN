@@ -1,7 +1,7 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Chrismon014/ERDN/refs/heads/main/Library", true))()
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/memejames/elerium-v2-ui-library/main/Library", true))()
 
 -- VENTANA PRINCIPAL
 local window = library:AddWindow("ERDN PRivate", {
@@ -10,18 +10,22 @@ local window = library:AddWindow("ERDN PRivate", {
     can_resize = false,
 })
 
--- FORZAR QUE APAREZCA EN PANTALLA
+-- Bucle para animar el RGB de manera fluida en los márgenes y elementos
 task.spawn(function()
-    task.wait(0.5)
-    local gui = game:GetService("CoreGui"):FindFirstChild("imgui")
-    if gui then
-        gui.Enabled = true
+    local hue = 0
+    while true do
+        hue = (hue + 0.002) % 1 -- Velocidad del cambio de color (ajústala si lo quieres más rápido o lento)
+        local rgbColor = Color3.fromHSV(hue, 1, 1)
+        
+        pcall(function()
+            -- Aplica el color actualizado al tema principal de la librería de Elerium
+            window.main_color = rgbColor
+            -- Si la librería soporta actualización visual directa en los bordes/marcos, se reflejará aquí
+        end)
+        
+        task.wait(0.03)
     end
 end)
-
-local AutoFarm = window:AddTab("Farm OP")
-AutoFarm:Show()
-
 
 -- 1ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â£ Switch: Fuerza OP
 AutoFarm:AddSwitch("OP STRENGTH", function(state)
