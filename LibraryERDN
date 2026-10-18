@@ -1,5 +1,6 @@
 --[[ 
-    ERDN Modern UI Library 
+    ERDN Modern UI Library
+    Diseño: Cuadrado, Borde RGB Animado, Avatar de Jugador, Minimizado con Imagen y Pestañas.
 ]]
 
 local Library = {}
@@ -65,7 +66,7 @@ function Library:CreateWindow(config)
         IgnoreGuiInset = true
     }, RunService:IsStudio() and Player.PlayerGui or (gethui and gethui() or CoreGui))
 
-    -- Ventana Principal con Borde RGB
+    -- Ventana Principal Borde RGB
     local MainRGBFrame = Create("Frame", {
         Name = "MainRGBFrame",
         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -100,7 +101,7 @@ function Library:CreateWindow(config)
 
     Create("UICorner", {CornerRadius = UDim.new(0, 8)}, MainFrame)
 
-    -- Cuadro Miniatura con Borde RGB
+    -- Cuadro Minimizado con Borde RGB
     local MiniRGBFrame = Create("Frame", {
         Name = "MiniRGBFrame",
         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -135,7 +136,7 @@ function Library:CreateWindow(config)
         Image = miniIconId
     }, MiniBox)
 
-    -- Animación RGB Continua
+    -- Loop Animación RGB
     task.spawn(function()
         while ScreenGui.Parent do
             MainGradient.Rotation = (MainGradient.Rotation + 2) % 360
@@ -144,7 +145,7 @@ function Library:CreateWindow(config)
         end
     end)
 
-    -- Barra Superior
+    -- Barra Superior Negra
     local TopBar = Create("Frame", {
         Name = "TopBar",
         BackgroundColor3 = Color3.fromRGB(10, 10, 10),
@@ -225,7 +226,7 @@ function Library:CreateWindow(config)
         end
     end)
 
-    -- Contenedor y Sidebar
+    -- Contenedor Principal
     local Container = Create("Frame", {
         Name = "Container",
         BackgroundTransparency = 1,
@@ -233,6 +234,7 @@ function Library:CreateWindow(config)
         Size = UDim2.new(1, 0, 1, -32)
     }, MainFrame)
 
+    -- Sidebar (Panel Izquierdo)
     local Sidebar = Create("Frame", {
         Name = "Sidebar",
         BackgroundColor3 = Color3.fromRGB(14, 14, 14),
@@ -241,7 +243,7 @@ function Library:CreateWindow(config)
         Size = UDim2.new(0, 150, 1, 0)
     }, Container)
 
-    -- Perfil de usuario
+    -- Foto y datos de usuario
     local AvatarImage = Create("ImageLabel", {
         Name = "AvatarImage",
         BackgroundColor3 = Color3.fromRGB(30, 30, 30),
@@ -282,6 +284,7 @@ function Library:CreateWindow(config)
         Size = UDim2.new(1, -24, 0, 1)
     }, Sidebar)
 
+    -- Contenedor de Botones de Pestañas
     local TabButtonsScroll = Create("ScrollingFrame", {
         Name = "TabButtonsScroll",
         BackgroundTransparency = 1,
@@ -298,6 +301,7 @@ function Library:CreateWindow(config)
         Padding = UDim.new(0, 6)
     }, TabButtonsScroll)
 
+    -- Contenedor de Páginas (Derecha)
     local PagesContainer = Create("Frame", {
         Name = "PagesContainer",
         BackgroundTransparency = 1,
@@ -308,10 +312,10 @@ function Library:CreateWindow(config)
     local WindowObj = {}
     local firstTab = true
 
+    -- Crear Pestaña (Estructura Original Exacta)
     function WindowObj:CreateTab(tabName)
         local TabButton = Create("TextButton", {
             Font = Enum.Font.GothamMedium,
-            Text = "  " + tabName, -- En Luau se concatena con ..
             Text = "  " .. tabName,
             TextColor3 = Color3.fromRGB(160, 160, 160),
             TextSize = 13,
@@ -334,10 +338,14 @@ function Library:CreateWindow(config)
             Visible = false
         }, PagesContainer)
 
-        Create("UIListLayout", {
+        local PageLayout = Create("UIListLayout", {
             SortOrder = Enum.SortOrder.LayoutOrder,
-            Padding = UDim.src and UDim.new(0, 8) or UDim.new(0, 8)
+            Padding = UDim.new(0, 8)
         }, TabPage)
+
+        PageLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            TabPage.CanvasSize = UDim2.new(0, 0, 0, PageLayout.AbsoluteContentSize.Y + 10)
+        end)
 
         if firstTab then
             firstTab = false
@@ -361,7 +369,59 @@ function Library:CreateWindow(config)
             TabButton.BackgroundTransparency = 0.2
         end)
 
-        return TabPage
+        -- Métodos internos de la Pestaña para crear elementos dentro de ella
+        local TabElements = {}
+
+        function TabElements:CreateToggle(config, callback)
+            local toggleName = config.Name or "Toggle"
+            local defaultState = config.Default or false
+            local currentState = defaultState
+
+            local ToggleButton = Create("TextButton", {
+                Font = Enum.Font.GothamMedium,
+                Text = "  " .. toggleName,
+                TextColor3 = Color3.fromRGB(200, 200, 200),
+                TextSize = 12,
+                BackgroundColor3 = Color3.fromRGB(25, 25, 25),
+                BackgroundTransparency = 0.2,
+                Size = UDim2.new(1, -6, 0, 36),
+                TextXAlignment = Enum.TextXAlignment.Left
+            }, TabPage)
+
+            Create("UICorner", {CornerRadius = UDim.new(0, 6)}, ToggleButton)
+
+            local StatusIndicator = Create("Frame", {
+                BackgroundColor3 = currentState and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(60, 60, 60),
+                BorderSizePixel = 0,
+                Position = UDim2.new(1, -28, 0.5, -9),
+                Size = UDim2.new(0, 18, 0, 18),
+                AnchorPoint = Vector2.new(0, 0.5)
+            }, ToggleButton)
+
+            Create("UICorner", {CornerRadius = UDim.new(1, 0)}, StatusIndicator)
+
+            local function updateToggle()
+                if currentState then
+                    TweenService:Create(StatusIndicator, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 255, 100)}):Play()
+                else
+                    TweenService:Create(StatusIndicator, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
+                end
+                pcall(callback, currentState)
+            end
+
+            ToggleButton.MouseButton1Click:Connect(function()
+                currentState = not currentState
+                updateToggle()
+            end)
+
+            if defaultState then
+                pcall(callback, true)
+            end
+
+            return ToggleButton
+        end
+
+        return TabElements
     end
 
     return WindowObj
