@@ -1,6 +1,5 @@
 --[[ 
-    ERDN Modern UI Library
-    Diseño: Cuadrado, Borde RGB Animado, Avatar de Jugador, Minimizado con Imagen y Pestañas.
+    ERDN Modern UI Library - Fixed Tabs Container
 ]]
 
 local Library = {}
@@ -66,7 +65,7 @@ function Library:CreateWindow(config)
         IgnoreGuiInset = true
     }, RunService:IsStudio() and Player.PlayerGui or (gethui and gethui() or CoreGui))
 
-    -- Ventana Principal Borde RGB
+    -- Ventana Principal con Borde RGB
     local MainRGBFrame = Create("Frame", {
         Name = "MainRGBFrame",
         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -101,7 +100,7 @@ function Library:CreateWindow(config)
 
     Create("UICorner", {CornerRadius = UDim.new(0, 8)}, MainFrame)
 
-    -- Cuadro Minimizado con Borde RGB
+    -- Cuadro Miniatura
     local MiniRGBFrame = Create("Frame", {
         Name = "MiniRGBFrame",
         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -136,7 +135,7 @@ function Library:CreateWindow(config)
         Image = miniIconId
     }, MiniBox)
 
-    -- Loop Animación RGB
+    -- Animación RGB
     task.spawn(function()
         while ScreenGui.Parent do
             MainGradient.Rotation = (MainGradient.Rotation + 2) % 360
@@ -145,7 +144,7 @@ function Library:CreateWindow(config)
         end
     end)
 
-    -- Barra Superior Negra
+    -- Barra Superior
     local TopBar = Create("Frame", {
         Name = "TopBar",
         BackgroundColor3 = Color3.fromRGB(10, 10, 10),
@@ -243,7 +242,7 @@ function Library:CreateWindow(config)
         Size = UDim2.new(0, 150, 1, 0)
     }, Container)
 
-    -- Foto y datos de usuario
+    -- Avatar e Info de Usuario
     local AvatarImage = Create("ImageLabel", {
         Name = "AvatarImage",
         BackgroundColor3 = Color3.fromRGB(30, 30, 30),
@@ -284,22 +283,19 @@ function Library:CreateWindow(config)
         Size = UDim2.new(1, -24, 0, 1)
     }, Sidebar)
 
-    -- Contenedor de Botones de Pestañas
-    local TabButtonsScroll = Create("ScrollingFrame", {
-        Name = "TabButtonsScroll",
+    -- CONTENEDOR DE BOTONES DE PESTAÑAS (¡Solucionado aquí!)
+    local TabButtonList = Create("Frame", {
+        Name = "TabButtonList",
         BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 0, 72),
-        Size = UDim2.new(1, 0, 1, -78),
-        CanvasSize = UDim2.new(0, 0, 0, 0),
-        ScrollBarThickness = 2
+        Position = UDim2.new(0, 8, 0, 70),
+        Size = UDim2.new(1, -16, 1, -78)
     }, Sidebar)
 
-    local TabButtonsLayout = Create("UIListLayout", {
+    Create("UIListLayout", {
         HorizontalAlignment = Enum.HorizontalAlignment.Center,
         SortOrder = Enum.SortOrder.LayoutOrder,
         Padding = UDim.new(0, 6)
-    }, TabButtonsScroll)
+    }, TabButtonList)
 
     -- Contenedor de Páginas (Derecha)
     local PagesContainer = Create("Frame", {
@@ -312,7 +308,6 @@ function Library:CreateWindow(config)
     local WindowObj = {}
     local firstTab = true
 
-    -- Crear Pestaña (Estructura Original Exacta)
     function WindowObj:CreateTab(tabName)
         local TabButton = Create("TextButton", {
             Font = Enum.Font.GothamMedium,
@@ -321,9 +316,9 @@ function Library:CreateWindow(config)
             TextSize = 13,
             BackgroundColor3 = Color3.fromRGB(25, 25, 25),
             BackgroundTransparency = 1,
-            Size = UDim2.new(1, -16, 0, 32),
+            Size = UDim2.new(1, 0, 0, 32),
             TextXAlignment = Enum.TextXAlignment.Left
-        }, TabButtonsScroll)
+        }, TabButtonList)
 
         Create("UICorner", {CornerRadius = UDim.new(0, 6)}, TabButton)
 
@@ -358,7 +353,7 @@ function Library:CreateWindow(config)
             for _, page in ipairs(PagesContainer:GetChildren()) do
                 if page:IsA("ScrollingFrame") then page.Visible = false end
             end
-            for _, btn in ipairs(TabButtonsScroll:GetChildren()) do
+            for _, btn in ipairs(TabButtonList:GetChildren()) do
                 if btn:IsA("TextButton") then
                     btn.TextColor3 = Color3.fromRGB(160, 160, 160)
                     btn.BackgroundTransparency = 1
@@ -369,10 +364,9 @@ function Library:CreateWindow(config)
             TabButton.BackgroundTransparency = 0.2
         end)
 
-        -- Métodos internos de la Pestaña para crear elementos dentro de ella
-        local TabElements = {}
+        local TabMethods = {}
 
-        function TabElements:CreateToggle(config, callback)
+        function TabMethods:CreateToggle(config, callback)
             local toggleName = config.Name or "Toggle"
             local defaultState = config.Default or false
             local currentState = defaultState
@@ -421,7 +415,7 @@ function Library:CreateWindow(config)
             return ToggleButton
         end
 
-        return TabElements
+        return TabMethods
     end
 
     return WindowObj
