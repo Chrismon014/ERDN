@@ -44,10 +44,10 @@ local RebirthsCombination = false
 local RebirthChaos = false
 local RebirthsTitans = false
 
--- Variables de Auto TP Muscle King
+-- Variables de Auto TP Muscle King (Nuevas Coordenadas)
 local AutoTPMuscleFarming = false
 local AutoTPMuscleRebirth = false
-local MuscleKingCF = CFrame.new(-8646, 17, -5738)
+local MuscleKingCF = CFrame.new(-8748, 123, -5865)
 
 -- Variables de Configuración y Autoreconectador
 local AutoRejoinActive = false
@@ -1601,7 +1601,7 @@ TeleportTab:AddButton("Legend Island", function()
 end)
 
 TeleportTab:AddButton("Muscle King Island", function()
-    tpTo(CFrame.new(-8748, 123, -5865), "Muscle King")
+    tpTo(CFrame.new(-8646, 17, -5738), "Muscle King")
 end)
 
 TeleportTab:AddButton("Jungle Island", function()
