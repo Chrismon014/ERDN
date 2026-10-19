@@ -330,16 +330,19 @@ createFarmLoop(function() return FastFarm2k end, 1000, 180)
 createFarmLoop(function() return FastFarm10k end, 5000, 350)
 createFarmLoop(function() return FastFarm20k end, 10000, 500)
 
--- ==================== BUCLE DE AUTO TP EXCLUSIVO Y DIRECTO ====================
+-- ==================== BUCLE DE AUTO TP INDEPENDIENTE ====================
 task.spawn(function()
     while true do
-        -- ÚNICAMENTE se activa si el usuario enciende el switch manual de Auto TP
         if AutoTPMuscleFarming or AutoTPMuscleRebirth then
             pcall(function()
                 local char = LP.Character
-                if char and char:FindFirstChild("HumanoidRootPart") then
-                    char.HumanoidRootPart.Velocity = Vector3.zero
-                    char.HumanoidRootPart.CFrame = MuscleKingCF
+                if char then
+                    local root = char:FindFirstChild("HumanoidRootPart")
+                    if root then
+                        root.AssemblyLinearVelocity = Vector3.zero
+                        root.AssemblyAngularVelocity = Vector3.zero
+                        root.CFrame = MuscleKingCF
+                    end
                 end
             end)
             task.wait(0.05)
@@ -468,7 +471,7 @@ local function runFastRebirthWorker(getStateRef, getGenRef, setGenRef, equipRepF
         pcall(function()
             while isCurrent(currentGen) do
                 equipRepFunc(function() return isCurrent(currentGen) end)
-                if not isCurrent(currentGen) me break end
+                if not isCurrent(currentGen) then break end
                 
                 performCycle(currentGen)
                 task.wait()
