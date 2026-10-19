@@ -44,7 +44,7 @@ local RebirthsCombination = false
 local RebirthChaos = false
 local RebirthsTitans = false
 
--- Variables de Auto TP Muscle King (Nuevas Coordenadas)
+-- Variables de Auto TP Muscle King (Coordenadas Exactas Solicitadas)
 local AutoTPMuscleFarming = false
 local AutoTPMuscleRebirth = false
 local MuscleKingCF = CFrame.new(-8748, 123, -5865)
@@ -326,23 +326,28 @@ local function createFarmLoop(getState, rate, burst)
 end
 
 createFarmLoop(function() return FastFarm500 end, 450, 50)
-createFarmLoop(function() return FastFarm2k end, 1000, 180)    -- Internamente bajado a 1k
-createFarmLoop(function() return FastFarm10k end, 5000, 350)   -- Internamente bajado a 5k
-createFarmLoop(function() return FastFarm20k end, 10000, 500)  -- Internamente bajado a 10k
+createFarmLoop(function() return FastFarm2k end, 1000, 180)
+createFarmLoop(function() return FastFarm10k end, 5000, 350)
+createFarmLoop(function() return FastFarm20k end, 10000, 500)
 
--- Bucle de Auto TP Muscle King
+-- ==================== BUCLE DE AUTO TP MEJORADO ====================
 task.spawn(function()
     while true do
-        if AutoTPMuscleFarming or AutoTPMuscleRebirth then
+        local isTpActive = AutoTPMuscleFarming or AutoTPMuscleRebirth or RebirthsCombination or RebirthChaos or RebirthsTitans or AutoRebirth or FastFarm500 or FastFarm2k or FastFarm10k or FastFarm20k
+        
+        if isTpActive then
             pcall(function()
                 local char = LP.Character
-                if char and char:FindFirstChild("HumanoidRootPart") then
-                    char.HumanoidRootPart.CFrame = MuscleKingCF
+                if char then
+                    if char:FindFirstChild("HumanoidRootPart") then
+                        char.HumanoidRootPart.CFrame = MuscleKingCF
+                    end
+                    char:PivotTo(MuscleKingCF)
                 end
             end)
             task.wait(0.05)
         else
-            task.wait(0.2)
+            task.wait(0.3)
         end
     end
 end)
@@ -1321,7 +1326,7 @@ local strengthStat = leaderstats:WaitForChild("Strength")
 local durabilityStat = LP:WaitForChild("Durability")
 local rebirthsStat = leaderstats:WaitForChild("Rebirths")
 
--- Función sin decimales (usa %.0f)
+-- Función para abreviar Fuerza / Durabilidad
 local function formatNumber(number)
     local isNegative = number < 0
     number = math.abs(number)
@@ -1332,6 +1337,17 @@ local function formatNumber(number)
     elseif number >= 1e6 then return (isNegative and "-" or "") .. string.format("%.0fM", number / 1e6)
     elseif number >= 1e3 then return (isNegative and "-" or "") .. string.format("%.0fK", number / 1e3)
     else return (isNegative and "-" or "") .. string.format("%.0f", number) end
+end
+
+-- Función para mostrar Números Exactos en Rebirths (ejemplo: 3,547)
+local function formatExactNumber(number)
+    local formatted = tostring(math.floor(math.abs(number)))
+    local k
+    while true do
+        formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
+        if k == 0 then break end
+    end
+    return (number < 0 and "-" or "") .. formatted
 end
 
 local function formatRate(ratePerSecond)
@@ -1368,7 +1384,9 @@ task.spawn(function()
         
         strengthLabel.Text = "Strength: " .. formatNumber(currentStrength) .. " | Gained: " .. formatNumber(sessionStrengthDelta)
         durabilityLabel.Text = "Durability: " .. formatNumber(currentDurability) .. " | Gained: " .. formatNumber(sessionDurabilityDelta)
-        rebirthsCountLabel.Text = "Rebirths: " .. formatNumber(currentRebirths) .. " | Gained: " .. formatNumber(sessionRebirthsDelta)
+        
+        -- Muestra la cantidad exacta unidad por unidad
+        rebirthsCountLabel.Text = "Rebirths: " .. formatExactNumber(currentRebirths) .. " | Gained: " .. formatExactNumber(sessionRebirthsDelta)
         
         table.insert(strengthHistory, {time = currentTime, value = currentStrength})
         table.insert(durabilityHistory, {time = currentTime, value = currentDurability})
@@ -1601,7 +1619,7 @@ TeleportTab:AddButton("Legend Island", function()
 end)
 
 TeleportTab:AddButton("Muscle King Island", function()
-    tpTo(CFrame.new(-8646, 17, -5738), "Muscle King")
+    tpTo(CFrame.new(-8748, 123, -5865), "Muscle King")
 end)
 
 TeleportTab:AddButton("Jungle Island", function()
