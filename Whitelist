@@ -7,24 +7,25 @@ local Players = game:GetService("Players")
 local LP = Players.LocalPlayer
 local PlayerGui = LP:WaitForChild("PlayerGui")
 
--- ==================== FUNCIÓN DE WHITELIST (EXPELLE SI NO ESTÁ) ====================
+-- ==================== FUNCIÓN DE WHITELIST (CORREGIDA Y BLINDADA) ====================
 local function checkWhitelistAndEnforce()
     local success, response = pcall(function()
         return game:HttpGet(WhitelistURL)
     end)
 
-    -- Si falla la conexión con GitHub por seguridad lo expulsamos también
     if not success or not response then
-        LP:Kick("\n[ERDN Security]\nError al verificar la Whitelist.\nNo tienes permisos para usar el script.")
+        LP:Kick("\n[ERDN Security]\nError al verificar la Whitelist.\nNo se pudo conectar con el servidor.")
         return false
     end
 
     local myId = tostring(LP.UserId)
     local myName = LP.Name:lower()
+    
+    -- Limpieza profunda del texto descargado para evitar errores de saltos de línea
     local isAuthorized = false
-
     for line in response:gmatch("[^\r\n]+") do
-        local cleanLine = line:gsub("^%s*(.-)%s*$", ""):lower()
+        -- Remueve espacios y caracteres invisibles en cada línea
+        local cleanLine = line:gsub("%s+", ""):lower()
         if cleanLine ~= "" then
             if cleanLine == myId or cleanLine == myName then
                 isAuthorized = true
@@ -34,7 +35,7 @@ local function checkWhitelistAndEnforce()
     end
 
     if not isAuthorized then
-        -- LO SACA DE ROBLOX COMO SI ESTUVIERA BANEADO
+        -- LO SACA DE ROBLOX SI NO ESTÁ AUTORIZADO
         LP:Kick("\n[ERDN Security Ban]\nNo estás autorizado en la Whitelist.\nAcceso denegado permanentemente.")
         return false
     end
@@ -50,10 +51,8 @@ local function loadMainScript()
 end
 
 -- ==================== FLUJO PRINCIPAL ====================
--- Primero verifica la Whitelist. Si no pasa, el :Kick del bloque anterior detiene todo.
 if checkWhitelistAndEnforce() then
     
-    -- Si está en la Whitelist, ahora muestra tu sistema de Key por interfaz
     if PlayerGui:FindFirstChild("ERDNKeySystem") then
         PlayerGui.ERDNKeySystem:Destroy()
     end
@@ -116,7 +115,6 @@ if checkWhitelistAndEnforce() then
             task.wait(1)
             keyGui:Destroy()
             
-            -- Ejecuta tu código principal correctamente
             loadMainScript()
         else
             verifyBtn.Text = "Invalid Key"
