@@ -1069,7 +1069,7 @@ PrincipalTab:CreateToggle({
 end)
 
 -- ==================== PESTAÑA FARMING ====================
-FarmingTab:AddSection("Activar para Rebirths+Fuerza")
+FarmingTab:AddSection("AUTO TP")
 
 FarmingTab:CreateToggle({
     Name = "Auto TP Muscle King",
@@ -1078,6 +1078,8 @@ FarmingTab:CreateToggle({
 }, function(state)
     AutoTPMuscleFarming = state
 end)
+
+FarmingTab:AddSection("Activar para Rebirths+Fuerza")
 
 FarmingTab:CreateToggle({
     Name = "OP Farm (500 Rep/s)",
@@ -1134,7 +1136,7 @@ FarmingTab:CreateToggle({
 end)
 
 -- ==================== PESTAÑA REBIRTH ====================
-RebirthTab:AddSection("Rebirth")
+RebirthTab:AddSection("AUTO TP")
 
 RebirthTab:CreateToggle({
     Name = "Auto TP Muscle King",
@@ -1143,6 +1145,8 @@ RebirthTab:CreateToggle({
 }, function(state)
     AutoTPMuscleRebirth = state
 end)
+
+RebirthTab:AddSection("Rebirth")
 
 RebirthTab:CreateToggle({
     Name = "Auto Rebirth",
@@ -1301,11 +1305,15 @@ StatsTab:AddSection("Estadisticas Time Real")
 local stopwatchLabel = StatsTab:AddButton("Fast Rep Time: 0d 0h 0m 0s", function() end)
 local projectedStrengthLabel = StatsTab:AddButton("Strength Rate: 0/s", function() end)
 local projectedDurabilityLabel = StatsTab:AddButton("Durability Rate: 0/s", function() end)
+
+StatsTab:AddSection("Calculadora de Rebirths")
 local rebirthsRateLabel = StatsTab:AddButton("Rebirths Rate: 0/s", function() end)
 
 StatsTab:AddSection("Progreso de Estadísticas")
 local strengthLabel = StatsTab:AddButton("Strength: 0 | Gained: 0", function() end)
 local durabilityLabel = StatsTab:AddButton("Durability: 0 | Gained: 0", function() end)
+
+StatsTab:AddSection("Información de Rebirths")
 local rebirthsCountLabel = StatsTab:AddButton("Rebirths: 0 | Gained: 0", function() end)
 
 local leaderstats = LP:WaitForChild("leaderstats")
@@ -1313,16 +1321,17 @@ local strengthStat = leaderstats:WaitForChild("Strength")
 local durabilityStat = LP:WaitForChild("Durability")
 local rebirthsStat = leaderstats:WaitForChild("Rebirths")
 
+-- Función sin decimales (usa %.0f)
 local function formatNumber(number)
     local isNegative = number < 0
     number = math.abs(number)
-    if number >= 1e18 then return (isNegative and "-" or "") .. string.format("%.2fQi", number / 1e18)
-    elseif number >= 1e15 then return (isNegative and "-" or "") .. string.format("%.2fQa", number / 1e15)
-    elseif number >= 1e12 then return (isNegative and "-" or "") .. string.format("%.2fT", number / 1e12)
-    elseif number >= 1e9 then return (isNegative and "-" or "") .. string.format("%.2fB", number / 1e9)
-    elseif number >= 1e6 then return (isNegative and "-" or "") .. string.format("%.2fM", number / 1e6)
-    elseif number >= 1e3 then return (isNegative and "-" or "") .. string.format("%.2fK", number / 1e3)
-    else return (isNegative and "-" or "") .. string.format("%.2f", number) end
+    if number >= 1e18 then return (isNegative and "-" or "") .. string.format("%.0fQi", number / 1e18)
+    elseif number >= 1e15 then return (isNegative and "-" or "") .. string.format("%.0fQa", number / 1e15)
+    elseif number >= 1e12 then return (isNegative and "-" or "") .. string.format("%.0fT", number / 1e12)
+    elseif number >= 1e9 then return (isNegative and "-" or "") .. string.format("%.0fB", number / 1e9)
+    elseif number >= 1e6 then return (isNegative and "-" or "") .. string.format("%.0fM", number / 1e6)
+    elseif number >= 1e3 then return (isNegative and "-" or "") .. string.format("%.0fK", number / 1e3)
+    else return (isNegative and "-" or "") .. string.format("%.0f", number) end
 end
 
 local function formatRate(ratePerSecond)
