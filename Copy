@@ -44,7 +44,7 @@ local RebirthsCombination = false
 local RebirthChaos = false
 local RebirthsTitans = false
 
--- Variables de Auto TP Muscle King Independiente
+-- Variables de Auto TP Muscle King (Coordenadas Exactas Solicitadas)
 local AutoTPMuscleFarming = false
 local AutoTPMuscleRebirth = false
 local MuscleKingCF = CFrame.new(-8748, 123, -5865)
@@ -330,19 +330,19 @@ createFarmLoop(function() return FastFarm2k end, 1000, 180)
 createFarmLoop(function() return FastFarm10k end, 5000, 350)
 createFarmLoop(function() return FastFarm20k end, 10000, 500)
 
--- ==================== BUCLE DE AUTO TP INDEPENDIENTE ====================
+-- ==================== BUCLE DE AUTO TP MEJORADO ====================
 task.spawn(function()
     while true do
-        if AutoTPMuscleFarming or AutoTPMuscleRebirth then
+        local isTpActive = AutoTPMuscleFarming or AutoTPMuscleRebirth or RebirthsCombination or RebirthChaos or RebirthsTitans or AutoRebirth or FastFarm500 or FastFarm2k or FastFarm10k or FastFarm20k
+        
+        if isTpActive then
             pcall(function()
                 local char = LP.Character
                 if char then
-                    local root = char:FindFirstChild("HumanoidRootPart")
-                    if root then
-                        root.AssemblyLinearVelocity = Vector3.zero
-                        root.AssemblyAngularVelocity = Vector3.zero
-                        root.CFrame = MuscleKingCF
+                    if char:FindFirstChild("HumanoidRootPart") then
+                        char.HumanoidRootPart.CFrame = MuscleKingCF
                     end
+                    char:PivotTo(MuscleKingCF)
                 end
             end)
             task.wait(0.05)
