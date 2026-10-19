@@ -1,4 +1,3 @@
-Necesito que la Fast fuerza la dejes visual como esta pero la Rep toca bajarle, la de 2k bajala a 1k, la de 10k bajala a 5k y la de 20k bajala a 10k, como dije cambia valores internos, pero visual sigue igual: 
 -- ==================== SERVICIOS Y VARIABLES ====================
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -44,6 +43,11 @@ local AutoRebirth = false
 local RebirthsCombination = false
 local RebirthChaos = false
 local RebirthsTitans = false
+
+-- Variables de Auto TP Muscle King
+local AutoTPMuscleFarming = false
+local AutoTPMuscleRebirth = false
+local MuscleKingCF = CFrame.new(-8646, 17, -5738)
 
 -- Variables de Configuración y Autoreconectador
 local AutoRejoinActive = false
@@ -322,9 +326,26 @@ local function createFarmLoop(getState, rate, burst)
 end
 
 createFarmLoop(function() return FastFarm500 end, 450, 50)
-createFarmLoop(function() return FastFarm2k end, 1000, 180)
-createFarmLoop(function() return FastFarm10k end, 5000, 350)
-createFarmLoop(function() return FastFarm20k end, 10000, 500)
+createFarmLoop(function() return FastFarm2k end, 1000, 180)    -- Internamente bajado a 1k
+createFarmLoop(function() return FastFarm10k end, 5000, 350)   -- Internamente bajado a 5k
+createFarmLoop(function() return FastFarm20k end, 10000, 500)  -- Internamente bajado a 10k
+
+-- Bucle de Auto TP Muscle King
+task.spawn(function()
+    while true do
+        if AutoTPMuscleFarming or AutoTPMuscleRebirth then
+            pcall(function()
+                local char = LP.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    char.HumanoidRootPart.CFrame = MuscleKingCF
+                end
+            end)
+            task.wait(0.05)
+        else
+            task.wait(0.2)
+        end
+    end
+end)
 
 -- ==================== AUTO REBIRTH NORMAL ====================
 task.spawn(function()
@@ -678,7 +699,6 @@ function Library:CreateWindow(config)
         Size = UDim2.new(1, -24, 0, 1)
     }, Sidebar)
 
-    -- ==================== CORRECCIÓN: SCROLLINGFRAME PARA EL MENÚ LATERAL ====================
     local NavContainer = Create("ScrollingFrame", {
         Name = "NavContainer",
         Size = UDim2.new(1, -6, 1, -64),
@@ -1052,6 +1072,14 @@ end)
 FarmingTab:AddSection("Activar para Rebirths+Fuerza")
 
 FarmingTab:CreateToggle({
+    Name = "Auto TP Muscle King",
+    Description = "Teletransporte continuo al Muscle King",
+    Default = false
+}, function(state)
+    AutoTPMuscleFarming = state
+end)
+
+FarmingTab:CreateToggle({
     Name = "OP Farm (500 Rep/s)",
     Description = "Velocidad recomendada para combinar con Fast Rebirth",
     Default = false
@@ -1107,6 +1135,14 @@ end)
 
 -- ==================== PESTAÑA REBIRTH ====================
 RebirthTab:AddSection("Rebirth")
+
+RebirthTab:CreateToggle({
+    Name = "Auto TP Muscle King",
+    Description = "Teletransporte continuo al Muscle King",
+    Default = false
+}, function(state)
+    AutoTPMuscleRebirth = state
+end)
 
 RebirthTab:CreateToggle({
     Name = "Auto Rebirth",
@@ -1270,14 +1306,21 @@ StatsTab:AddSection("Progreso de Estadísticas")
 local strengthLabel = StatsTab:AddButton("Strength: 0 | Gained: 0", function() end)
 local durabilityLabel = StatsTab:AddButton("Durability: 0 | Gained: 0", function() end)
 
+-- Sección de Calculadora de Rebirths añadida
+StatsTab:AddSection("Calculadora de Rebirths")
+local rebirthsRateLabel = StatsTab:AddButton("Rebirths Rate: 0 /Hour", function() end)
+local rebirthsCountLabel = StatsTab:AddButton("Rebirths: 0 | Gained: 0", function() end)
+
 local leaderstats = LP:WaitForChild("leaderstats")
 local strengthStat = leaderstats:WaitForChild("Strength")
 local durabilityStat = LP:WaitForChild("Durability")
+local rebirthsStat = leaderstats:WaitForChild("Rebirths")
 
 local function formatNumber(number)
     local isNegative = number < 0
     number = math.abs(number)
-    if number >= 1e15 then return (isNegative and "-" or "") .. string.format("%.2fQa", number / 1e15)
+    if number >= 1e18 then return (isNegative and "-" or "") .. string.format("%.2fQi", number / 1e18)
+    elseif number >= 1e15 then return (isNegative and "-" or "") .. string.format("%.2fQa", number / 1e15)
     elseif number >= 1e12 then return (isNegative and "-" or "") .. string.format("%.2fT", number / 1e12)
     elseif number >= 1e9 then return (isNegative and "-" or "") .. string.format("%.2fB", number / 1e9)
     elseif number >= 1e6 then return (isNegative and "-" or "") .. string.format("%.2fM", number / 1e6)
@@ -1285,12 +1328,18 @@ local function formatNumber(number)
     else return (isNegative and "-" or "") .. string.format("%.2f", number) end
 end
 
+local function formatRate(ratePerSecond)
+    return formatNumber(ratePerSecond) .. "/s | " .. formatNumber(ratePerSecond * 60) .. "/min | " .. formatNumber(ratePerSecond * 3600) .. "/h | " .. formatNumber(ratePerSecond * 86400) .. "/d"
+end
+
 local startTime = tick()
 local initialStrength = strengthStat.Value
 local initialDurability = durabilityStat.Value
+local initialRebirths = rebirthsStat.Value
 local trackingStarted = false
 local strengthHistory = {}
 local durabilityHistory = {}
+local rebirthsHistory = {}
 local calculationInterval = 10
 
 task.spawn(function()
@@ -1299,11 +1348,14 @@ task.spawn(function()
         local currentTime = tick()
         local currentStrength = strengthStat.Value
         local currentDurability = durabilityStat.Value
+        local currentRebirths = rebirthsStat.Value
+        
         if not trackingStarted and (currentStrength - initialStrength) >= 100e9 then
             trackingStarted = true
             startTime = tick()
             strengthHistory = {}
             durabilityHistory = {}
+            rebirthsHistory = {}
         end
         if trackingStarted then
             local elapsedTime = currentTime - startTime
@@ -1315,13 +1367,19 @@ task.spawn(function()
             
             local sessionStrengthDelta = currentStrength - initialStrength
             local sessionDurabilityDelta = currentDurability - initialDurability
+            local sessionRebirthsDelta = currentRebirths - initialRebirths
+            
             strengthLabel.Text = "Strength: " .. formatNumber(currentStrength) .. " | Gained: " .. formatNumber(sessionStrengthDelta)
             durabilityLabel.Text = "Durability: " .. formatNumber(currentDurability) .. " | Gained: " .. formatNumber(sessionDurabilityDelta)
+            rebirthsCountLabel.Text = "Rebirths: " .. formatNumber(currentRebirths) .. " | Gained: " .. formatNumber(sessionRebirthsDelta)
             
             table.insert(strengthHistory, {time = currentTime, value = currentStrength})
             table.insert(durabilityHistory, {time = currentTime, value = currentDurability})
+            table.insert(rebirthsHistory, {time = currentTime, value = currentRebirths})
+            
             while #strengthHistory > 0 and currentTime - strengthHistory[1].time > calculationInterval do table.remove(strengthHistory, 1) end
             while #durabilityHistory > 0 and currentTime - durabilityHistory[1].time > calculationInterval do table.remove(durabilityHistory, 1) end
+            while #rebirthsHistory > 0 and currentTime - rebirthsHistory[1].time > calculationInterval do table.remove(rebirthsHistory, 1) end
             
             if currentTime - lastCalcTime >= calculationInterval then
                 lastCalcTime = currentTime
@@ -1338,6 +1396,11 @@ task.spawn(function()
                     local durabilityPerHour = math.floor(durabilityPerSecond * 3600)
                     local durabilityPerDay = math.floor(durabilityPerSecond * 86400)
                     projectedDurabilityLabel.Text = "Durability: " .. formatNumber(durabilityPerHour) .. "/H | " .. formatNumber(durabilityPerDay) .. "/D"
+                end
+                if #rebirthsHistory >= 2 then
+                    local rebirthsDelta = rebirthsHistory[#rebirthsHistory].value - rebirthsHistory[1].value
+                    local rebirthsPerSecond = rebirthsDelta / calculationInterval
+                    rebirthsRateLabel.Text = "Rebirths Rate: " .. formatRate(rebirthsPerSecond)
                 end
             end
         end
@@ -1511,7 +1574,7 @@ local function tpTo(cf, name)
         humanoidRootPart.CFrame = cf
         StarterGui:SetCore("SendNotification", {
             Title = "Teletransporte",
-            Text = "Teleported to " .. name,
+            Text = "Teleported to " + name,
             Duration = 3
         })
     end)
