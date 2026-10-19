@@ -1,5 +1,5 @@
 -- ==================== CONFIGURACIÓN DE LA KEY ====================
-local ValidKey = "SLK" -- Cambia tu key aquí
+local ValidKey = "ERDNONTOP" -- Cambia tu key aquí
 local MainScriptURL = "https://raw.githubusercontent.com/Chrismon014/ERDN/refs/heads/main/MainScript.lua" -- Enlace a tu script de funciones en GitHub
 -- ====================================================================
 
