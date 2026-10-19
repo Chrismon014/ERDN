@@ -1548,7 +1548,7 @@ TeleportTab:AddButton("Legend Island", function()
 end)
 
 TeleportTab:AddButton("Muscle King Island", function()
-    tpTo(CFrame.new(-8646, 17, -5738), "Muscle King")
+    tpTo(CFrame.new(-8738, 17, -5748), "Muscle King")
 end)
 
 TeleportTab:AddButton("Jungle Island", function()
