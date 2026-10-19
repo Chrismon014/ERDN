@@ -21,7 +21,7 @@ end)
 
 pcall(function()
     StarterGui:SetCore("SendNotification", {
-        Title = "SLK Paid Hub",
+        Title = "ERDN Paid",
         Text = "Anti-AFK Activo 🛡️",
         Duration = 4
     })
@@ -83,7 +83,7 @@ CoreGui.RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
     if AutoRejoinActive and (child.Name == "ErrorPrompt" or child:FindFirstChild("ErrorTitle")) then
         pcall(function()
             StarterGui:SetCore("SendNotification", {
-                Title = "SLK Paid Hub",
+                Title = "ERDN PRIVATE",
                 Text = "Reconectando al servidor... 🔄",
                 Duration = 5
             })
@@ -529,15 +529,15 @@ end
 
 function Library:CreateWindow(config)
     local WindowObj = {}
-    local windowTitle = config.Title or "👑 ChrisxLale Script"
+    local windowTitle = config.Title or "👑 ERDN PRIVATE"
     
     local parentUI = (gethui and gethui()) or CoreGui or LP:WaitForChild("PlayerGui")
-    if parentUI:FindFirstChild("ChrisxLale_AestheticUI") then
+    if parentUI:FindFirstChild("Chris_AestheticUI") then
         parentUI.ChrisxLale_AestheticUI:Destroy()
     end
 
     local ScreenGui = Create("ScreenGui", {
-        Name = "ChrisxLale_AestheticUI",
+        Name = "Chris_AestheticUI",
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
         IgnoreGuiInset = true
     }, parentUI)
@@ -555,7 +555,7 @@ function Library:CreateWindow(config)
     Create("UIStroke", {Color = Color3.fromRGB(120, 80, 255), Thickness = 1.5}, MainFrame)
 
     local MiniButton = Create("TextButton", {
-        Name = "ChrisxLale_Mini",
+        Name = "Chris_Mini",
         Size = UDim2.new(0, 140, 0, 38),
         Position = UDim2.new(1, -155, 0, 15),
         BackgroundColor3 = Color3.fromRGB(22, 22, 30),
@@ -992,19 +992,19 @@ end
 
 -- ==================== INICIALIZACIÓN DE LA UI ====================
 local Window = Library:CreateWindow({
-    Title = "👑 ChrisxLale Script",
+    Title = "👑 PRIVATE CHRIS",
     Icon = "rbxassetid://6031097225"
 })
 
 -- Crear Pestañas
 local PrincipalTab = Window:CreateTab("Principal", "🏠", "Bienvenido al script, " .. LP.Name)
-local FarmingTab = Window:CreateTab("Farming", "🏋️", "Automatización de recursos")
-local RebirthTab = Window:CreateTab("Rebirth", "🌌", "Sistema de reencarnaciones")
-local RocksTab = Window:CreateTab("Auto Rocks", "⛰️", "Farming automático de rocas")
-local StatsTab = Window:CreateTab("Stats", "📊", "Calculadoras y monitoreo en tiempo real")
-local GiftTab = Window:CreateTab("Gift", "🎁", "Regalar consumibles a otros jugadores")
-local TeleportTab = Window:CreateTab("Teleport", "🌀", "Viaja por el mapa")
-local SettingsTab = Window:CreateTab("Settings", "⚙️", "Configuración y automatización")
+local FarmingTab = Window:CreateTab("Farming", "🏋️", "Fast Fuerza")
+local RebirthTab = Window:CreateTab("Rebirth", "🌌", "Fast Renacimientos")
+local RocksTab = Window:CreateTab("Auto Rocks", "⛰️", "Farm Rocks")
+local StatsTab = Window:CreateTab("Stats", "📊", "Estadisticas")
+local GiftTab = Window:CreateTab("Gift", "🎁", "Regala eggs")
+local TeleportTab = Window:CreateTab("Teleport", "🌀", "TPs")
+local SettingsTab = Window:CreateTab("Settings", "⚙️", "Configuración")
 
 -- ==================== PESTAÑA PRINCIPAL ====================
 PrincipalTab:AddSection("Utilidades")
@@ -1016,7 +1016,7 @@ PrincipalTab:CreateToggle({
     if state then
         pcall(function()
             StarterGui:SetCore("SendNotification", {
-                Title = "SLK Paid Hub",
+                Title = "PRIVATE",
                 Text = "Anti-AFK Activo 🛡️",
                 Duration = 3
             })
@@ -1025,8 +1025,8 @@ PrincipalTab:CreateToggle({
 end)
 
 PrincipalTab:CreateToggle({
-    Name = "Anti Lag Ligero",
-    Description = "Baja gráficos y sombras sin alterar los colores del mapa",
+    Name = "Anti Lag",
+    Description = "Baja gráficos",
     Default = false
 }, function(state)
     pcall(function()
@@ -1035,7 +1035,7 @@ PrincipalTab:CreateToggle({
             Lighting.GlobalShadows = false
             Lighting.Technology = Enum.LightingTechnology.Compatibility
             StarterGui:SetCore("SendNotification", {
-                Title = "SLK Paid Hub",
+                Title = "PRIVATE",
                 Text = "Anti Lag Activado ⚡",
                 Duration = 3
             })
@@ -1067,7 +1067,7 @@ FarmingTab:AddSection("Solo fuerza")
 
 FarmingTab:CreateToggle({
     Name = "OP Farm (2k Rep/s)",
-    Description = "Velocidad rápida: 2,000 repeticiones por segundo",
+    Description = "Fast Fuerza",
     Default = false
 }, function(state)
     FastFarm2k = state
@@ -1080,7 +1080,7 @@ end)
 
 FarmingTab:CreateToggle({
     Name = "OP Farm (10k Rep/s)",
-    Description = "Velocidad alta: 10,000 repeticiones por segundo",
+    Description = "Ultra Fuerza",
     Default = false
 }, function(state)
     FastFarm10k = state
@@ -1093,7 +1093,7 @@ end)
 
 FarmingTab:CreateToggle({
     Name = "OP Farm (20k Rep/s)",
-    Description = "Velocidad máxima: 20,000 repeticiones por segundo",
+    Description = "Ultra Fast Fuerza",
     Default = false
 }, function(state)
     FastFarm20k = state
@@ -1109,7 +1109,7 @@ RebirthTab:AddSection("Rebirth")
 
 RebirthTab:CreateToggle({
     Name = "Auto Rebirth",
-    Description = "Rebirth automático básico por fuerza",
+    Description = "Activar junto con 500Rep/s",
     Default = false
 }, function(state)
     AutoRebirth = state
@@ -1124,7 +1124,7 @@ RebirthTab:AddSection("Fast Rebirth")
 
 RebirthTab:CreateToggle({
     Name = "Auto Rebirths combination",
-    Description = "Sirven Golems/Packs",
+    Description = "Sirven Golems/Packs/Dragon",
     Default = false
 }, function(state)
     RebirthsCombination = state
@@ -1259,7 +1259,7 @@ for _, rockInfo in ipairs(rockList) do
 end
 
 -- ==================== PESTAÑA STATS & CALCULATOR ====================
-StatsTab:AddSection("Monitoreo en Tiempo Real")
+StatsTab:AddSection("Estadisticas Time Real")
 
 local stopwatchLabel = StatsTab:AddButton("Fast Rep Time: 0d 0h 0m 0s", function() end)
 local projectedStrengthLabel = StatsTab:AddButton("Strength Rate: 0 /Hour", function() end)
@@ -1345,7 +1345,7 @@ task.spawn(function()
 end)
 
 -- ==================== PESTAÑA GIFT ====================
-GiftTab:AddSection("Monitoreo de Consumibles")
+GiftTab:AddSection("Gift Eggs")
 
 local proteinEggBtn = GiftTab:AddButton("Protein Eggs: 0", function() end)
 
@@ -1386,7 +1386,7 @@ GiftTab:AddButton("🔄 Refresh Players / Items", function()
     updateItemCounts()
     pcall(function()
         StarterGui:SetCore("SendNotification", {
-            Title = "SLK Paid Hub",
+            Title = "PRIVATE",
             Text = "Lista de jugadores y consumibles actualizada! 🔄",
             Duration = 3
         })
@@ -1572,7 +1572,7 @@ SettingsTab:CreateToggle({
     SaveConfig()
     pcall(function()
         StarterGui:SetCore("SendNotification", {
-            Title = "SLK Paid Hub",
+            Title = "PRIVATE",
             Text = state and "Auto Execute Activado ⚙️" or "Auto Execute Desactivado ❌",
             Duration = 3
         })
@@ -1590,7 +1590,7 @@ SettingsTab:CreateToggle({
     SaveConfig()
     pcall(function()
         StarterGui:SetCore("SendNotification", {
-            Title = "SLK Paid Hub",
+            Title = "PRIVATE",
             Text = state and "Auto Rejoin Activado 🔄" or "Auto Rejoin Desactivado ❌",
             Duration = 3
         })
