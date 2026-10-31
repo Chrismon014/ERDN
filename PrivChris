@@ -10,7 +10,6 @@ local StarterGui = game:GetService("StarterGui")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local Workspace = game:GetService("Workspace")
-local VirtualInputManager = game:GetService("VirtualInputManager")
 
 local LP = Players.LocalPlayer
 local player = LP
@@ -20,7 +19,7 @@ local State = getgenv().State
 
 local services = {
     replicatedstorage = ReplicatedStorage,
-    virtualinputmanager = VirtualInputManager,
+    virtualinputmanager = game:GetService("VirtualInputManager"),
     collectionservice = game:GetService("CollectionService"),
     muscleEvent = ReplicatedStorage:WaitForChild("rEvents", 10),
     isSolara = false,
@@ -583,6 +582,7 @@ function Library:CreateWindow(config)
         IgnoreGuiInset = true
     }, parentUI)
 
+    -- PALETA: Blanco Transparentoso (Fondo) y Dorado/Amarillo Brillante (Bordes/Líneas)
     local MainFrame = Create("Frame", {
         Name = "MainFrame",
         BackgroundColor3 = Color3.fromRGB(245, 245, 250),
@@ -1150,7 +1150,7 @@ local StatsTab = Window:CreateTab("Stats", "📊", "Estadisticas")
 local GiftTab = Window:CreateTab("Gift", "🎁", "Regala eggs")
 local BossTab = Window:CreateTab("Boss", "👹", "Sistema de Bosses")
 local TeleportTab = Window:CreateTab("Teleport", "🌀", "TPs")
-local AutoRaceTab = Window:CreateTab("Auto Race", "🏎️", "Carreras automáticas y Tienda")
+local AutoRaceTab = Window:CreateTab("Auto Race", "🏎️", "Carreras automáticas con clics")
 local SettingsTab = Window:CreateTab("Settings", "⚙️", "Configuración")
 
 local tabs = {
@@ -2367,7 +2367,7 @@ tabs.boss.Halloween.AutoFarmSwitch = tabs.boss:AddSwitch("Auto Farm Halloween Bo
                         tabs.boss.Halloween.StatusLabel.Text = "Status: Fighting" 						
                         tabs.boss.attack(tabs.boss.Halloween, model, health, maxHealth, hitbox) 					
                     else 						
-                        tabs.boss.StatusLabel.Text = "Status: Waiting for Respawn" 					end 				
+                        tabs.boss.Halloween.StatusLabel.Text = "Status: Waiting for Respawn" 					end 				
                 else 					
                     tabs.boss.Halloween.Data.Target = nil 					
                     tabs.boss.Halloween.Data.Phase = "Waiting" 					
@@ -2408,26 +2408,9 @@ TeleportTab:AddButton("Jungle Island", function() tpTo(CFrame.new(-8659, 6, 2384
 TeleportTab:AddButton("Industrial Gym", function() tpTo(CFrame.new(-5563.23388671875, 60.47392654418945, 4942.44482421875), "Industrial Gym") end)
 TeleportTab:AddButton("Halloween Gym", function() tpTo(CFrame.new(5558, 86, 5838), "Halloween Gym") end)
 
--- ==================== AUTO RACE TAB (CLICS EN PANTALLA + AUTO BUY) ====================
+-- ==================== AUTO RACE TAB (CON CLICS AUTOMÁTICOS) ====================
 AutoRaceTab:AddSection("Sistema de Auto Race")
-local RaceStatusLabel = AutoRaceTab:AddLabel("ZONE: IDLE")
-
-local ShopItems = {
-    {Name = "Protein Shake", Key = "ProteinShake_x1", Price = 40, Slot = 1},
-    {Name = "Energy Shake", Key = "EnergyShake_x1", Price = 40, Slot = 2},
-    {Name = "TOUGH Bar", Key = "ToughBar_x1", Price = 80, Slot = 3},
-    {Name = "Hercules Lionbells", Key = "HerculesLionbells_Skin", Price = 100, Slot = 4},
-    {Name = "Apollo Sunforge", Key = "ApolloSunforge_Skin", Price = 300, Slot = 5},
-    {Name = "Poseidon Tideweight", Key = "PoseidonTideweight_Skin", Price = 600, Slot = 6},
-    {Name = "Zeus Stormrunner", Key = "ZeusStormrunner_Skin", Price = 1500, Slot = 7},
-    {Name = "Poseidon's Wrath", Key = "PoseidonsWrath_Aura", Price = 4500, Slot = 8},
-    {Name = "Zeus Thunderstorm", Key = "ZeusThunderstorm_Aura", Price = 7500, Slot = 9},
-    {Name = "Ares Ironfang", Key = "AresIronfang_Pet", Price = 2500, Slot = 10},
-    {Name = "Poseidon Tide", Key = "PoseidonTide_Pet", Price = 5000, Slot = 11},
-    {Name = "Zeus Spark", Key = "ZeusSpark_Pet", Price = 8500, Slot = 12}
-}
-
-local SelectedShopItems = {}
+RaceStatusLabel = AutoRaceTab:AddLabel("ZONE: IDLE")
 
 local ZoneColors = {
     Yellow = Color3.fromRGB(221, 181, 0),
@@ -2484,11 +2467,19 @@ local function startAutoRace()
                 if hum.Sit then hum.Sit = false end
                 hum.WalkSpeed = originalSpeed
                 
-                -- Clics reales de pantalla sin golpear ni equipar herramientas
+                -- Dar clics en pantalla automáticamente mientras compite (Equipar Punch + FireServer rep + tool activate)
                 pcall(function()
-                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
-                    task.wait(0.01)
-                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
+                    local backpack = player:FindFirstChild("Backpack")
+                    local punch = char:FindFirstChild("Punch") or (backpack and backpack:FindFirstChild("Punch"))
+                    if punch and punch.Parent == backpack then
+                        hum:EquipTool(punch)
+                    end
+                    if LP:FindFirstChild("muscleEvent") then
+                        LP.muscleEvent:FireServer("rep")
+                    end
+                    if punch and punch.Parent == char then
+                        punch:Activate()
+                    end
                 end)
                 
                 local rx, ry, rz = hrp.CFrame:ToEulerAnglesYXZ()
@@ -2568,8 +2559,8 @@ local function stopAutoRace()
 end
 
 AutoRaceTab:CreateToggle({
-    Name = "Auto Race + Clics Pantalla",
-    Description = "Corre de forma automática generando clics en la pantalla",
+    Name = "Auto Race + Auto Clicks",
+    Description = "Corre automáticamente y da clics en la pantalla",
     Default = false
 }, function(state)
     if state then
@@ -2578,65 +2569,6 @@ AutoRaceTab:CreateToggle({
         stopAutoRace()
     end
 end)
-
-AutoRaceTab:AddSection("Auto Buy Shop")
-
-local function startAutoBuy()
-    task.spawn(function()
-        while State.AutoBuy do
-            local rEvents = RS:FindFirstChild("rEvents")
-            local medalShopRemote = rEvents and rEvents:FindFirstChild("medalShopRemote")
-            
-            if medalShopRemote then
-                for name, item in pairs(SelectedShopItems) do
-                    if not State.AutoBuy then break end
-                    
-                    local purchaseTable = {
-                        ItemName = item.Name,
-                        Key = item.Key,
-                        Price = item.Price,
-                        SlotIndex = item.Slot,
-                        Quantity = 1
-                    }
-
-                    pcall(function()
-                        medalShopRemote:InvokeServer("Purchase", purchaseTable)
-                    end)
-                    
-                    task.wait(0.5)
-                end
-            end
-            task.wait(1)
-        end
-    end)
-end
-
-AutoRaceTab:CreateToggle({
-    Name = "Auto Buy Selected Items",
-    Description = "Compra los objetos seleccionados automáticamente",
-    Default = false
-}, function(state)
-    State.AutoBuy = state
-    if state then
-        startAutoBuy()
-    end
-end)
-
-AutoRaceTab:AddSection("Selección de la Tienda")
-
-for _, item in ipairs(ShopItems) do
-    AutoRaceTab:CreateToggle({
-        Name = "Buy " .. item.Name .. " (" .. item.Price .. ")",
-        Description = "Comprar " .. item.Name,
-        Default = false
-    }, function(state)
-        if state then
-            SelectedShopItems[item.Name] = item
-        else
-            SelectedShopItems[item.Name] = nil
-        end
-    end)
-end
 
 SettingsTab:AddSection("Auto Execute")
 SettingsTab:CreateToggle({
