@@ -582,7 +582,6 @@ function Library:CreateWindow(config)
         IgnoreGuiInset = true
     }, parentUI)
 
-    -- PALETA: Blanco Transparentoso (Fondo) y Dorado/Amarillo Brillante (Bordes/Líneas)
     local MainFrame = Create("Frame", {
         Name = "MainFrame",
         BackgroundColor3 = Color3.fromRGB(245, 245, 250),
@@ -769,6 +768,7 @@ function Library:CreateWindow(config)
         ["Boss"] = "👹",
         ["Teleport"] = "🌀",
         ["Auto Race"] = "🏎️",
+        ["Auto Shop"] = "🛒",
         ["Settings"] = "⚙️"
     }
 
@@ -1150,7 +1150,8 @@ local StatsTab = Window:CreateTab("Stats", "📊", "Estadisticas")
 local GiftTab = Window:CreateTab("Gift", "🎁", "Regala eggs")
 local BossTab = Window:CreateTab("Boss", "👹", "Sistema de Bosses")
 local TeleportTab = Window:CreateTab("Teleport", "🌀", "TPs")
-local AutoRaceTab = Window:CreateTab("Auto Race", "🏎️", "Carreras automáticas con clics")
+local AutoRaceTab = Window:CreateTab("Auto Race", "🏎️", "Carreras automáticas")
+local AutoShopTab = Window:CreateTab("Auto Shop", "🛒", "Compra automática en tienda")
 local SettingsTab = Window:CreateTab("Settings", "⚙️", "Configuración")
 
 local tabs = {
@@ -2408,7 +2409,7 @@ TeleportTab:AddButton("Jungle Island", function() tpTo(CFrame.new(-8659, 6, 2384
 TeleportTab:AddButton("Industrial Gym", function() tpTo(CFrame.new(-5563.23388671875, 60.47392654418945, 4942.44482421875), "Industrial Gym") end)
 TeleportTab:AddButton("Halloween Gym", function() tpTo(CFrame.new(5558, 86, 5838), "Halloween Gym") end)
 
--- ==================== AUTO RACE TAB (CON CLICS AUTOMÁTICOS) ====================
+-- ==================== AUTO RACE TAB ====================
 AutoRaceTab:AddSection("Sistema de Auto Race")
 RaceStatusLabel = AutoRaceTab:AddLabel("ZONE: IDLE")
 
@@ -2466,21 +2467,6 @@ local function startAutoRace()
                 hum.PlatformStand = false
                 if hum.Sit then hum.Sit = false end
                 hum.WalkSpeed = originalSpeed
-                
-                -- Dar clics en pantalla automáticamente mientras compite (Equipar Punch + FireServer rep + tool activate)
-                pcall(function()
-                    local backpack = player:FindFirstChild("Backpack")
-                    local punch = char:FindFirstChild("Punch") or (backpack and backpack:FindFirstChild("Punch"))
-                    if punch and punch.Parent == backpack then
-                        hum:EquipTool(punch)
-                    end
-                    if LP:FindFirstChild("muscleEvent") then
-                        LP.muscleEvent:FireServer("rep")
-                    end
-                    if punch and punch.Parent == char then
-                        punch:Activate()
-                    end
-                end)
                 
                 local rx, ry, rz = hrp.CFrame:ToEulerAnglesYXZ()
                 if math.abs(rx) > 0.2 or math.abs(rz) > 0.2 then
@@ -2559,14 +2545,68 @@ local function stopAutoRace()
 end
 
 AutoRaceTab:CreateToggle({
-    Name = "Auto Race + Auto Clicks",
-    Description = "Corre automáticamente y da clics en la pantalla",
+    Name = "Auto Race",
+    Description = "Corre automáticamente en las carreras",
     Default = false
 }, function(state)
     if state then
         startAutoRace()
     else
         stopAutoRace()
+    end
+end)
+
+-- ==================== AUTO SHOP TAB ====================
+AutoShopTab:AddSection("Auto Comprar Cristales (Crystals)")
+local crystalList = {
+    "Blue Crystal", "Green Crystal", "Frost Crystal", "Inferno Crystal", "Mythical Crystal", "Legend Crystal", "Muscle King Crystal", "Jungle Crystal", "Dark Crystal", "Vampire Crystal", "Halloween Crystal"
+}
+
+for _, crystalName in ipairs(crystalList) do
+    AutoShopTab:CreateToggle({
+        Name = "Buy " .. crystalName,
+        Description = "Compra automática de cristales",
+        Default = false
+    }, function(state)
+        getgenv()["AutoBuy_" .. crystalName] = state
+        if state then
+            task.spawn(function()
+                while getgenv()["AutoBuy_" .. crystalName] do
+                    pcall(function()
+                        local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
+                        local openCrystalRemote = rEvents and rEvents:FindFirstChild("openCrystalRemote")
+                        if openCrystalRemote then
+                            openCrystalRemote:InvokeServer(crystalName, 1)
+                        end
+                    end)
+                    task.wait(0.3)
+                end
+            end)
+        end
+    end)
+end
+
+AutoShopTab:AddSection("Auto Comprar Herramientas / Ranks (Shop)")
+AutoShopTab:CreateToggle({
+    Name = "Auto Buy Best Weights / Ranks",
+    Description = "Compra automáticamente mejoras de tienda disponibles",
+    Default = false
+}, function(state)
+    getgenv().AutoBuyShopItems = state
+    if state then
+        task.spawn(function()
+            while getgenv().AutoBuyShopItems do
+                pcall(function()
+                    local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
+                    local buyRemote = rEvents and rEvents:FindFirstChild("buyItem") or rEvents and rEvents:FindFirstChild("purchaseItem")
+                    if buyRemote then
+                        buyRemote:FireServer("Weight")
+                        buyRemote:FireServer("Pushups")
+                    end
+                end)
+                task.wait(1)
+            end
+        end)
     end
 end)
 
